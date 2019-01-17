@@ -46,7 +46,6 @@
         .campo-no-valido{
             width: 200px;
             border: 2px solid #f21d00;
-            background-color: #ffd8dd;
             position: absolute;
             left: 300px;
         }
@@ -56,7 +55,7 @@
         .campo-no-valido:focus{
             border: 2px solid #f21d00;
         }
-        i.fa{
+        i.fa-check{
             color: #f7f8fe;
             background-color: #13cb11;
             border-radius: 10px;
@@ -67,6 +66,16 @@
             margin-top: 3.5px;
             display: none;
         }
+        i.fa-exclamation-circle{
+            color: #f21d00;
+            border-radius: 10px;
+            padding: 1px;
+            position: absolute;
+            left: 483px;
+            font-size: 16px;
+            margin-top: 2.5px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -74,13 +83,13 @@
 
     <h2>Contact Us</h2>
     <hr>
-    Nombre:     <input class="campo-vacio" type="text" id="nombre" oninput="validar(this)" required><i class="fa fa-check"></i>
+    Nombre:     <input class="campo-vacio" type="text" id="nombre" oninput="validar(this)" required><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
     <br><br>
-    Email:      <input class="campo-vacio" type="email" oninput="validar(this)"><i class="fa fa-check"></i>
+    Email:      <input class="campo-vacio" type="email" oninput="validar(this)"><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
     <br><br>
-    URL:        <input class="campo-vacio" type="url" oninput="validar(this)"><i class="fa fa-check"></i>
+    URL:        <input class="campo-vacio" type="url" oninput="validar(this)"><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
     <br><br>
-    Mensaje:    <textarea class="campo-vacio" oninput="validar(this)" required></textarea><i class="fa fa-check"></i>
+    Mensaje:    <textarea class="campo-vacio" oninput="validar(this)" required></textarea><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
     <br><br>
     <br><br>
     <input type="submit" value="Submit Form" id="btn-envio" disabled>
@@ -109,9 +118,11 @@
         else if(esto.validity.valid){
             esto.className = 'campo-valido';
             esto.nextElementSibling.style.display = 'inline-block';
+            esto.nextElementSibling.nextElementSibling.style.display = 'none';
         }else{
             esto.className = 'campo-no-valido';
             esto.nextElementSibling.style.display = 'none';
+            esto.nextElementSibling.nextElementSibling.style.display = 'inline-block';
         }
 
         let formulario = esto.parentNode;
