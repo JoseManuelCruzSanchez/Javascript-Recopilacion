@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inputs y Validacion</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css'>
+    <style>
+        *{
+            box-shadow: none;
+        }
+        form{
+            padding-left: 10em;
+            padding-right: 10em;
+        }
+        input:focus{
+            border: 1px solid #555;
+        }
+        input[type^=submit]{
+            width: 200px;
+            background-color: #0db217; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 4px 2px;
+            position: absolute;
+            left: 300px;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .campo-vacio{
+            width: 200px;
+            border: 1px solid #555;
+            position: absolute;
+            left: 300px;
+        }
+        .campo-valido{
+            width: 200px;
+            border: 2px solid #00b200;
+            position: absolute;
+            left: 300px;
+        }
+        .campo-no-valido{
+            width: 200px;
+            border: 2px solid #f21d00;
+            position: absolute;
+            left: 300px;
+        }
+        .campo-valido:focus{
+            border: 2px solid #00b200;
+        }
+        .campo-no-valido:focus{
+            border: 2px solid #f21d00;
+        }
+        i.fa-check{
+            color: #f7f8fe;
+            background-color: #13cb11;
+            border-radius: 10px;
+            padding: 1px;
+            position: absolute;
+            left: 483px;
+            font-size: 12px;
+            margin-top: 3.5px;
+            display: none;
+        }
+        i.fa-exclamation-circle{
+            color: #f21d00;
+            border-radius: 10px;
+            padding: 1px;
+            position: absolute;
+            left: 483px;
+            font-size: 16px;
+            margin-top: 2.5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<form>
+
+    <h2>Contact Us</h2>
+    <hr>
+    Nombre:     <input class="campo-vacio" type="text" id="nombre" oninput="validar(this)" required><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
+    <br><br>
+    Email:      <input class="campo-vacio" type="email" pattern="[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@[a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{1,5}" oninput="validar(this)"><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
+    <br><br>
+    URL:        <input class="campo-vacio" type="url" pattern="^(https?://)?([a-zA-Z0-9]([a-zA-ZäöüÄÖÜ0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$" oninput="validar(this)"><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
+    <br><br>
+    Mensaje:    <textarea class="campo-vacio" oninput="validar(this)" required></textarea><i class="fa fa-check"></i><i class="fa fa-exclamation-circle"></i>
+    <br><br>
+    <br><br>
+    <input type="submit" value="Submit Form" id="btn-envio" disabled>
+    <br><br>
+    <br><br>
+    <hr>
+</form>
+
+<script>
+    function estan_todos_campos_validos(formulario) {
+        let campos_validos = 0;
+        for(let i = 0; i < formulario.elements.length; i++){
+            if(formulario.elements[i].validity.valid){
+                campos_validos++;
+
+            }
+        }
+        return campos_validos === 5;
+    }
+
+    function validar(esto){
+        if(esto.value === ''){
+            esto.className = 'campo-vacio';
+            esto.nextElementSibling.style.display = 'none';
+        }
+        else if(esto.validity.valid){
+            esto.className = 'campo-valido';
+            esto.nextElementSibling.style.display = 'inline-block';
+            esto.nextElementSibling.nextElementSibling.style.display = 'none';
+        }else{
+            esto.className = 'campo-no-valido';
+            esto.nextElementSibling.style.display = 'none';
+            esto.nextElementSibling.nextElementSibling.style.display = 'inline-block';
+        }
+
+        let formulario = esto.parentNode;
+        if(estan_todos_campos_validos(formulario)){
+            console.log('Todos ok')
+            document.querySelector('#btn-envio').disabled = false;
+            document.querySelector('#btn-envio').style.cursor = 'pointer';
+            document.querySelector('#btn-envio').style.opacity = '1';
+            document.querySelector('#btn-envio').style.fontWeight = 'bold';
+        }else{
+            console.log('Todos mal')
+            document.querySelector('#btn-envio').disabled = true;
+            document.querySelector('#btn-envio').style.cursor = 'not-allowed';
+            document.querySelector('#btn-envio').style.opacity = '0.6';
+            document.querySelector('#btn-envio').style.fontWeight = 'normal';
+        }
+    }
+
+
+</script>
+</body>
+
+
+
+
+
+
+
+
+
+
+</html>
