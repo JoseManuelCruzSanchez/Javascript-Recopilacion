@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Data</title>
+</head>
+<body>
+
+<select onchange="usuario_selecciona_year(this)">
+    <option>2011</option>
+    <option>2012</option>
+    <option>2013</option>
+    <option>2014</option>
+    <option>2015</option>
+    <option>2016</option>
+    <option>2017</option>
+    <option>2018</option>
+    <option>2019</option>
+</select>
+
+<select id="desplegable_circuitos">
+
+</select>
+
+<div id="salidaEventos">
+
+</div>
+
+
+<script type="text/javascript">
+    //let urlConsultaAPI = 'http://ergast.com/api/f1/current/last/laps.json?limit=1000';
+
+
+
+    function usuario_selecciona_year(seleccion){
+        let urlConsultaAPI = 'http://ergast.com/api/f1/'+seleccion.selectedOptions[0].innerText+'/circuits.json';// respuesta.MRData.CircuitTable.Circuits[0].circuitName
+        let respuesta = consulta_API_JSON(urlConsultaAPI, 'ejecutor_circuitos');
+    }
+
+
+
+    function consulta_API_JSON(url, ejecutor) {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            console.log('Estado: ' + this.readyState)
+            if (this.readyState === 4 && this.status === 200) {
+                respuesta = JSON.parse(this.responseText);
+                if(ejecutor === 'ejecutor_circuitos'){
+                    ejecutor_circuitos(respuesta);
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function ejecutor_circuitos(datos_json) {
+        let crear_nodos = '';
+        for(let i = 0; i < respuesta.MRData.CircuitTable.Circuits.length; i++){
+            crear_nodos += '<option>' + respuesta.MRData.CircuitTable.Circuits[i].circuitName + '</option>';
+        }
+        document.getElementById('desplegable_circuitos').innerHTML = crear_nodos;
+    }
+
+
+
+</script>
+
+</body>
+</html>
