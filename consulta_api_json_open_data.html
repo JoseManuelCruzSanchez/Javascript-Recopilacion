@@ -7,6 +7,7 @@
 <body>
 
 <select onchange="usuario_selecciona_year(this)">
+    <option>-</option>
     <option>2011</option>
     <option>2012</option>
     <option>2013</option>
@@ -33,8 +34,10 @@
 
 
     function usuario_selecciona_year(seleccion){
-        let urlConsultaAPI = 'http://ergast.com/api/f1/'+seleccion.selectedOptions[0].innerText+'/circuits.json';// respuesta.MRData.CircuitTable.Circuits[0].circuitName
-        let respuesta = consulta_API_JSON(urlConsultaAPI, 'ejecutor_circuitos');
+        if (seleccion.selectedOptions[0].innerText !== '-'){
+            let urlConsultaAPI = 'http://ergast.com/api/f1/' + seleccion.selectedOptions[0].innerText + '/circuits.json';// respuesta.MRData.CircuitTable.Circuits[0].circuitName
+            let respuesta = consulta_API_JSON(urlConsultaAPI, 'ejecutor_circuitos');
+        }
     }
 
 
@@ -56,8 +59,8 @@
 
     function ejecutor_circuitos(datos_json) {
         let crear_nodos = '';
-        for(let i = 0; i < respuesta.MRData.CircuitTable.Circuits.length; i++){
-            crear_nodos += '<option>' + respuesta.MRData.CircuitTable.Circuits[i].circuitName + '</option>';
+        for(let i = 0; i < datos_json.MRData.CircuitTable.Circuits.length; i++){
+            crear_nodos += '<option>' + datos_json.MRData.CircuitTable.Circuits[i].circuitName + '</option>';
         }
         document.getElementById('desplegable_circuitos').innerHTML = crear_nodos;
     }
