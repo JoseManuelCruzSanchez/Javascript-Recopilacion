@@ -3,12 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Open Data</title>
+    <style>
+        body{
+            text-align: center;
+        }
+        .rojo{
+            color: white;
+            background-color: #ff0000;
+        }
+        .verde{
+            color: white;
+            background-color: #00c800;
+        }
+        #salida_datos{
+            width: 650px;
+            margin: auto;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
 
 <select  id="desplegable_temporada" onchange="usuario_selecciona_temporada(this)">
     <option>-Temporada-</option>
-    <option>2019</option>
     <option>2018</option>
     <option>2017</option>
     <option>2016</option>
@@ -37,7 +54,6 @@
 
 
 <script type="text/javascript">
-    //let urlConsultaAPI = 'http://ergast.com/api/f1/current/last/laps.json?limit=1000';
     let respuesta_json;
 
     var parametros = {
@@ -118,44 +134,78 @@
     }
 
     function mostrar_resultados_en_pantalla(datos_json) {
+        let salida_datos = document.getElementById('salida_datos');
+        salida_datos.innerHTML = '';
         for (let i = 0; i < datos_json.MRData.RaceTable.Races[0].Results.length; i++){
-            let salida_datos = document.getElementById('salida_datos');
             if(datos_json.MRData.RaceTable.Races[0].Results[i].Driver.driverId === parametros.piloto){
-                 //console.log('bucle: ' + i);
-                 if(typeof datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time !== 'undefined'){
-                    console.log('Tiempo vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time.time)
-                 }
-                 console.log('Velocidad media de la vuelta más rápida: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].FastestLap.AverageSpeed.speed)
-                 console.log('Nº de la vuelta que fue más rápida: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].FastestLap.lap )
+                if (datos_json.MRData.RaceTable.Races[0].Results[i].status === 'Finished'){
+                    let nodo_status = document.createElement('h3');
+                    let text_status = document.createTextNode('Ha finalizado la carrera');
+                    nodo_status.appendChild(text_status);
+                    nodo_status.className = 'verde';
 
-                 console.log('Posicion al acabar la carrera: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].position)
-                 if(typeof respuesta_json.MRData.RaceTable.Races[0].Results[i].Time !== 'undefined'){
-                    console.log('Tiempo total de carrera: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].Time.time)
-                 }
-                 console.log('Status: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].status)
+                    salida_datos.appendChild(nodo_status);
+                }else{
+                    let nodo_status = document.createElement('h3');
+                    let text_status = document.createTextNode('No ha finalizado la carrera');
+                    nodo_status.appendChild(text_status);
+                    nodo_status.className = 'rojo';
 
-                salida_datos.innerHTML += '<h3>Status: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].status + '</h3>';
+                    let nodo_status_info = document.createElement('h4');
+                    let text_status_info = document.createTextNode('Causa: ' + datos_json.MRData.RaceTable.Races[0].Results[i].status);
+                    nodo_status_info.appendChild(text_status_info);
+
+                    salida_datos.appendChild(nodo_status);
+                    salida_datos.appendChild(nodo_status_info);
+                }
+
+                salida_datos.appendChild(document.createElement('hr'));
+
+                let nodo_posicion_final = document.createElement('h3');
+                let text_posicion_final = document.createTextNode('Posición al finalizar la carrera: ' + datos_json.MRData.RaceTable.Races[0].Results[i].position);
+                nodo_posicion_final.appendChild(text_posicion_final);
+                salida_datos.appendChild(nodo_posicion_final);
+
+                salida_datos.appendChild(document.createElement('hr'));
+
+                let nodo_num_vuelta_rapida = document.createElement('h3');
+                let text_num_vuelta_rapida = document.createTextNode('Nº vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.lap);
+                nodo_num_vuelta_rapida.appendChild(text_num_vuelta_rapida);
+                salida_datos.appendChild(nodo_num_vuelta_rapida);
+
+                let nodo_media_vel_vuelta_rapida = document.createElement('h2');
+                let text_media_vel_vuelta_rapida = document.createTextNode('Velocidad media en vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.AverageSpeed.speed + ' Km/h');
+                nodo_media_vel_vuelta_rapida.appendChild(text_media_vel_vuelta_rapida);
+                salida_datos.appendChild(nodo_media_vel_vuelta_rapida);
+
+                if(typeof datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time.time !== 'undefined'){
+                    let nodo_tiempo_vuelta_rapida = document.createElement('h2');
+                    let text_tiempo_vuelta_rapida = document.createTextNode('Tiempo vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time.time);
+                    nodo_tiempo_vuelta_rapida.appendChild(text_tiempo_vuelta_rapida);
+                    salida_datos.appendChild(nodo_tiempo_vuelta_rapida);
+                }else{
+                    let nodo_tiempo_vuelta_rapida = document.createElement('h2');
+                    let text_tiempo_vuelta_rapida = document.createTextNode('Tiempo vuelta más rápida: -- ');
+                    nodo_tiempo_vuelta_rapida.appendChild(text_tiempo_vuelta_rapida);
+                    salida_datos.appendChild(nodo_tiempo_vuelta_rapida);
+                }
+
+                salida_datos.appendChild(document.createElement('hr'));
+
+                if(typeof datos_json.MRData.RaceTable.Races[0].Results[i].Time.time !== 'undefined'){
+                    let nodo_tiempo_total_carrera = document.createElement('h3');
+                    let text_tiempo_total_carrera = document.createTextNode('Tiempo total de carrera: '+ datos_json.MRData.RaceTable.Races[0].Results[0].Time.time +' ' + datos_json.MRData.RaceTable.Races[0].Results[i].Time.time);
+                    nodo_tiempo_total_carrera.appendChild(text_tiempo_total_carrera);
+                    salida_datos.appendChild(nodo_tiempo_total_carrera);
+                }else{
+                    let nodo_tiempo_total_carrera = document.createElement('h3');
+                    let text_tiempo_total_carrera = document.createTextNode('Tiempo total de carrera: -- ');
+                    nodo_tiempo_total_carrera.appendChild(text_tiempo_total_carrera);
+                    salida_datos.appendChild(nodo_tiempo_total_carrera);
+                }
             }
         }
-
-        /*for (let i = 0; i < datos_json.MRData.RaceTable.Races[0].Results.length; i++){
-            console.log('bucle: ' + i);
-            if(typeof datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time !== 'undefined'){
-                console.log('Tiempo vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time.time)
-            }
-            console.log('Velocidad media de la vuelta más rápida: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].FastestLap.AverageSpeed.speed)
-            console.log('Nº de la vuelta que fue más rápida: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].FastestLap.lap )
-
-            console.log('Posicion al acabar la carrera: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].position)
-            if(typeof respuesta_json.MRData.RaceTable.Races[0].Results[i].Time !== 'undefined'){
-                console.log('Tiempo total de carrera: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].Time.time)
-            }
-            console.log('Status: ' + respuesta_json.MRData.RaceTable.Races[0].Results[i].status)
-        }*/
-
     }
-
-
 </script>
 
 
