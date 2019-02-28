@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Data</title>
+    <style>
+        body{
+            text-align: center;
+        }
+        .rojo{
+            color: white;
+            background-color: #ff0000;
+        }
+        .verde{
+            color: white;
+            background-color: #00c800;
+        }
+        #salida_datos{
+            width: 650px;
+            margin: auto;
+            text-align: left;
+        }
+    </style>
+    <script type="text/javascript" src="jQuery.js"></script>
+</head>
+<body>
+
+
+<!--
+    GRUPO DE DESPLEGABLES select
+-->
+    <select  id="desplegable_temporada" onchange="usuario_selecciona_temporada(this)">
+        <option>-Temporada-</option>
+        <option>2018</option>
+        <option>2017</option>
+        <option>2016</option>
+        <option>2015</option>
+        <option>2014</option>
+        <option>2013</option>
+        <option>2012</option>
+        <option>2011</option>
+    </select>
+
+    <select id="desplegable_circuitos">
+        <option>-Circuitos-</option>
+    </select>
+
+    <select id="desplegable_pilotos">
+        <option>-Pilotos-</option>
+    </select>
+<!--
+    GRUPO DE DESPLEGABLES select
+-->
+
+<!--
+    SCRIPT JQUERY PARA GUARDAR COMO PDF EL CONTENIDO DE salida_datos
+-->
+    <!--<script type="text/javascript" src="jQuery.js"></script> AÑADIDO EN HEAD-->
+    <script type="text/javascript">
+        $('#btnImprimir').live("click", function () {
+            var divContents = $("#salida_datos").html();
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html><head><title>Mi practica JSON / AJAX</title>');
+            printWindow.document.write('</head><body >');
+            printWindow.document.write(divContents);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        });
+    </script>
+    <form id="form1">
+        <input type="button" value="Imprimir PDF" id="btnImprimir" />
+    </form>
+    <div id="salida_datos"></div>
+<!--
+    SCRIPT JQUERY PARA GUARDAR COMO PDF EL CONTENIDO DE salida_datos
+-->
+
+
+<script type="text/javascript">
+    //Almacenamos la respuesta AJAX para debuging y uso a nivel global
+    let respuesta_json;
+
+    //Objeto que guarda los tres elementos de seleccion
+    var parametros = {
+        temporada:"",
+        circuito:"",
+        piloto:""
+    };
+
+    function usuario_selecciona_temporada(opcion){
+        if (opcion.selectedOptions[0].innerText !== '-Temporada-'){
+            parametros.temporada = opcion.selectedOptions[0].innerText;
+            let urlConsultaAPI = 'http://ergast.com/api/f1/' + parametros.temporada + '/circuits.json';// respuesta_json.MRData.CircuitTable.Circuits[0].circuitName
+            consulta_API_JSON(urlConsultaAPI, 'crear_nodos_desplegable_circuitos');
+            urlConsultaAPI = 'http://ergast.com/api/f1/' + parametros.temporada + '/drivers.json';
+            consulta_API_JSON(urlConsultaAPI, 'crear_nodos_desplegable_pilotos');
+        }
+        resultados_segun_parametros();
+    }
+
+    document.getElementById('desplegable_circuitos').addEventListener("change", usuario_selecciona_circuito, false);
+    function usuario_selecciona_circuito(event) {
+        if (event.target.selectedOptions[0].innerText !== '-Circuitos-'){
+            parametros.circuito = event.target.selectedOptions[0].id;
+        }
+        resultados_segun_parametros();
+    }
+
+    // onchange="usuario_selecciona_piloto(this)"
+    document.getElementById('desplegable_pilotos').onchange = usuario_selecciona_piloto;
+    function usuario_selecciona_piloto(event) {
+        if (event.target.selectedOptions[0].innerText !== '-Pilotos-'){
+            parametros.piloto = event.target.selectedOptions[0].id;
+        }
+        resultados_segun_parametros();
+    }
+
+    function consulta_API_JSON(url, que_funcion_ejecuta) {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            //console.log('Estado: ' + this.readyState);
+            if (this.readyState === 4 && this.status === 200) {
+                respuesta_json = JSON.parse(this.responseText);
+                if(que_funcion_ejecuta === 'crear_nodos_desplegable_circuitos'){
+                    crear_nodos_desplegable_circuitos(respuesta_json);
+                }
+                else if(que_funcion_ejecuta === 'crear_nodos_desplegable_pilotos'){
+                    crear_nodos_desplegable_pilotos(respuesta_json);
+                }
+                else if(que_funcion_ejecuta === 'mostrar_resultados_en_pantalla'){
+                    mostrar_resultados_en_pantalla(respuesta_json);
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function crear_nodos_desplegable_circuitos(datos_json) {
+        let crear_nodos = '<option>-Circuitos-</option>';
+        for(let i = 0; i < datos_json.MRData.CircuitTable.Circuits.length; i++){
+            crear_nodos += '<option id="' + datos_json.MRData.CircuitTable.Circuits[i].circuitId + '">' + datos_json.MRData.CircuitTable.Circuits[i].circuitName + '</option>';
+        }
+        document.getElementById('desplegable_circuitos').innerHTML = crear_nodos;
+    }
+
+    function crear_nodos_desplegable_pilotos(datos_json) {
+        let crear_nodos = '<option>-Pilotos-</option>';
+        for(let i = 0; i < respuesta_json.MRData.DriverTable.Drivers.length; i++){
+            crear_nodos += '<option id="' + respuesta_json.MRData.DriverTable.Drivers[i].driverId + '">' + respuesta_json.MRData.DriverTable.Drivers[i].givenName + ' ' +  respuesta_json.MRData.DriverTable.Drivers[i].familyName + '</option>';
+        }
+        document.getElementById('desplegable_pilotos').innerHTML = crear_nodos;
+    }
+
+    function resultados_segun_parametros() {
+        if(parametros.temporada !== '' && parametros.circuito !== ''  && parametros.piloto !== ''){
+            let urlConsultaAPI = 'http://ergast.com/api/f1/' + parametros.temporada + '/circuits/' + parametros.circuito + '/results.json';
+            consulta_API_JSON(urlConsultaAPI, 'mostrar_resultados_en_pantalla');
+        }
+    }
+
+    function mostrar_resultados_en_pantalla(datos_json) {
+        let salida_datos = document.getElementById('salida_datos');
+        salida_datos.innerHTML = '';
+        for (let i = 0; i < datos_json.MRData.RaceTable.Races[0].Results.length; i++){
+            if(datos_json.MRData.RaceTable.Races[0].Results[i].Driver.driverId === parametros.piloto){
+                if (datos_json.MRData.RaceTable.Races[0].Results[i].status === 'Finished'){
+                    let nodo_status = document.createElement('h3');
+                    let text_status = document.createTextNode('Ha finalizado la carrera');
+                    nodo_status.appendChild(text_status);
+                    nodo_status.setAttribute("class", "verde");
+
+                    salida_datos.appendChild(nodo_status);
+                }else{
+                    let nodo_status = document.createElement('h3');
+                    let text_status = document.createTextNode('No ha finalizado la carrera');
+                    nodo_status.appendChild(text_status);
+                    nodo_status.setAttribute("class", "rojo");
+
+                    let nodo_status_info = document.createElement('h4');
+                    let text_status_info = document.createTextNode('Causa: ' + datos_json.MRData.RaceTable.Races[0].Results[i].status);
+                    nodo_status_info.appendChild(text_status_info);
+
+                    salida_datos.appendChild(nodo_status);
+                    salida_datos.appendChild(nodo_status_info);
+                }
+
+                salida_datos.appendChild(document.createElement('hr'));
+
+                let nodo_posicion_final = document.createElement('h3');
+                let text_posicion_final = document.createTextNode('Posición al finalizar la carrera: ' + datos_json.MRData.RaceTable.Races[0].Results[i].position);
+                nodo_posicion_final.appendChild(text_posicion_final);
+                salida_datos.appendChild(nodo_posicion_final);
+
+                salida_datos.appendChild(document.createElement('hr'));
+
+                let nodo_num_vuelta_rapida = document.createElement('h3');
+                let text_num_vuelta_rapida = document.createTextNode('Nº vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.lap);
+                nodo_num_vuelta_rapida.appendChild(text_num_vuelta_rapida);
+                salida_datos.appendChild(nodo_num_vuelta_rapida);
+
+                let nodo_media_vel_vuelta_rapida = document.createElement('h2');
+                let text_media_vel_vuelta_rapida = document.createTextNode('Velocidad media en vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.AverageSpeed.speed + ' Km/h');
+                nodo_media_vel_vuelta_rapida.appendChild(text_media_vel_vuelta_rapida);
+                salida_datos.appendChild(nodo_media_vel_vuelta_rapida);
+
+                if(typeof datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time.time !== 'undefined'){
+                    let nodo_tiempo_vuelta_rapida = document.createElement('h2');
+                    let text_tiempo_vuelta_rapida = document.createTextNode('Tiempo vuelta más rápida: ' + datos_json.MRData.RaceTable.Races[0].Results[i].FastestLap.Time.time);
+                    nodo_tiempo_vuelta_rapida.appendChild(text_tiempo_vuelta_rapida);
+                    salida_datos.appendChild(nodo_tiempo_vuelta_rapida);
+                }else{
+                    let nodo_tiempo_vuelta_rapida = document.createElement('h2');
+                    let text_tiempo_vuelta_rapida = document.createTextNode('Tiempo vuelta más rápida: -- ');
+                    nodo_tiempo_vuelta_rapida.appendChild(text_tiempo_vuelta_rapida);
+                    salida_datos.appendChild(nodo_tiempo_vuelta_rapida);
+                }
+
+                salida_datos.appendChild(document.createElement('hr'));
+
+                if(typeof datos_json.MRData.RaceTable.Races[0].Results[i].Time.time !== 'undefined'){
+                    let nodo_tiempo_total_carrera = document.createElement('h3');
+                    let text_tiempo_total_carrera = document.createTextNode('Tiempo total de carrera: '+ datos_json.MRData.RaceTable.Races[0].Results[0].Time.time +' ' + datos_json.MRData.RaceTable.Races[0].Results[i].Time.time);
+                    nodo_tiempo_total_carrera.appendChild(text_tiempo_total_carrera);
+                    salida_datos.appendChild(nodo_tiempo_total_carrera);
+                }else{
+                    let nodo_tiempo_total_carrera = document.createElement('h3');
+                    let text_tiempo_total_carrera = document.createTextNode('Tiempo total de carrera: -- ');
+                    nodo_tiempo_total_carrera.appendChild(text_tiempo_total_carrera);
+                    salida_datos.appendChild(nodo_tiempo_total_carrera);
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>
