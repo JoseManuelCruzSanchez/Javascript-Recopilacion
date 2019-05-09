@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=  API KEY AQUI  ">
+
+</script>
+<input id="salida_datos" value="">
+<button id="btn_codigo_postal">Codigo Postal</button>
+<script>
+    document.getElementById('btn_codigo_postal').addEventListener('click', initMap);
+    function initMap() {
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var long = position.coords.longitude;
+                var point = new google.maps.LatLng(lat, long);
+                new google.maps.Geocoder().geocode(
+                    {'latLng': point},
+                    function (res) {
+                        var zip = res[0].address_components[res[0].address_components.length-1].long_name;
+                        document.getElementById('salida_datos').value = zip;
+                    }
+                );
+            });
+        }
+    }
+</script>
+</body>
+</html>
